@@ -2,6 +2,9 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
+import { Button, Container, FormControl, FormGroup, Form, Row, Col } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+
 
 class GasEstimator extends React.Component {
     constructor(props) {
@@ -14,6 +17,7 @@ class GasEstimator extends React.Component {
             timeLimit: null,
         };
     }
+
     connectWalletClick() {
         console.log('hello');
     }
@@ -26,19 +30,18 @@ class GasEstimator extends React.Component {
                 return;
             }
         }
-        // submit data to backend --> confirm message to user
-        // refresh state
     }
 
     render() {
-        console.log("statement 1");
         return (
             <div>
-                <h1> ETH Gas Fees Minimizer </h1>
-                <form>
-                    <Wallet onClick={() => this.connectWalletClick()} ></Wallet>
-                    <UserInput onClick={() => this.submitUserInputClick()}></UserInput>
-                </form>
+                <h1 className="header"> ETH Gas Fees Minimizer </h1>
+                <Container className="outer-container">
+                    <Form className="gas-form">
+                        <Wallet onClick={() => this.connectWalletClick()} ></Wallet>
+                        <UserInput onClick={() => this.submitUserInputClick()}></UserInput>
+                    </Form>
+                </Container>
             </div>
         );
     }
@@ -46,42 +49,37 @@ class GasEstimator extends React.Component {
 
 function Wallet(props) {
     return (
-        <label>
-            From:
-            <button type="button" onClick={() => props.onClick()}>Connect Wallet</button>
-            <br></br>
-        </label>
+        <Form.Group className="mb-3">
+            <Form.Text className="text-muted">From: </Form.Text>
+            <Button variant="outline-primary" type="button" onClick={() => props.onClick()}>Connect Wallet</Button>
+        </Form.Group>
     )
 }
 
 function UserInput(props) {
     return (
         <div>
-            <label>
-                To:
-            <input type="text" name="to" />
-                <br></br>
-            </label>
-            <label>
-                Gas limit (in USD):
-            <input type="number" name="gaslimit" />
-                <br></br>
-            </label>
-            <label>
-                ETH amount (in USD):
-            <input type="number" name="ethamount" />
-                <br></br>
-            </label>
-            <label>
-                Time limit (in hours):
-            <input type="number" name="timelimit" />
-                <br></br>
-            </label>
-            <input type="button" value="Submit" onClick={() => props.onClick()} />
+            <Form.Group className="mb-3">
+                <Form.Text className="text-muted">To: </Form.Text>
+                <Form.Control type="text" placeholder="Provide public key" />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Text className="text-muted">Gas Limit (in USD) </Form.Text>
+                <Form.Control type="number" min="0" placeholder="" />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Text className="text-muted">ETH amount (in USD) </Form.Text>
+                <Form.Control type="number" min="0" placeholder="" />
+            </Form.Group>
+            <Form.Group className="mb-3">
+                <Form.Text className="text-muted">Time limit (in hours) </Form.Text>
+                <Form.Control type="number" min="0" placeholder="" />
+            </Form.Group>
+
+            <Button variant="primary" type="button" onClick={() => props.onClick()}>Submit</Button>
         </div>
     )
 }
-
 
 
 // input fields
