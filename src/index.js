@@ -23,17 +23,24 @@ function GasEstimator() {
     const { ethereum } = window;
     if (Boolean(ethereum && ethereum.isMetaMask)) {
       await ethereum.request({ method: 'eth_requestAccounts' });
-      setConnected(true);
-    }
-  }
+      const nonceRes = await fetch('/get-nonce', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sender_wallet: ethereum.selectedAddress }),
+      });
+      const nonce = await nonceRes.text();
+      const signature = await ethereum.request({ method: 'personal_sign', params: [nonce, ethereum.selectedAddress] });
+      await fetch('/verify-signature', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ sender_wallet: ethereum.selectedAddress, signature }),
+      });
 
-  function submitUserInputClick() {
-    // ensure user entered valid values
-    for (const key in this.state) {
-      if (this.state[key] == null) {
-        alert("invalid state");
-        return;
-      }
+      setConnected(true);
     }
   }
 
@@ -44,7 +51,7 @@ function GasEstimator() {
         <Form className="gas-form">
           {!connected && <Wallet onClick={() => connectWalletClick()} ></Wallet>}
           {connected && <div>Wallet Connected</div>}
-          <UserInput onClick={() => submitUserInputClick()}></UserInput>
+          <UserInput />
         </Form>
       </Container>
     </div>
@@ -60,27 +67,48 @@ function Wallet(props) {
   )
 }
 
-function UserInput(props) {
+function UserInput() {
+  const [destinationWallet, setDestinationWallet] = React.useState('');
+  const [gasLimitDollars, setGasLimitDollars] = React.useState(0);
+  const [tokenAmount, setTokenAmount] = React.useState(0);
+  const [timeLimitHours, setTimeLimitHours] = React.useState(24);
+
+  async function addOrder() {
+    await fetch('/add-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        destination_wallet: destinationWallet,
+        amount: tokenAmount,
+        token: "wETH",
+        gas_limit_dollars: gasLimitDollars,
+        expires_at: new Date(new Date().getTime() + timeLimitHours * 60 * 60 * 1000).toISOString(),
+      }),
+    });
+  }
+
   return (
     <div>
       <Form.Group className="mb-3">
         <Form.Text className="text-muted">To: </Form.Text>
-        <Form.Control type="text" placeholder="Provide public key" />
+        <Form.Control type="text" placeholder="Provide public key" value={destinationWallet} onChange={e => setDestinationWallet(e.target.value)} />
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Text className="text-muted">Gas Limit (in USD) </Form.Text>
-        <Form.Control type="number" min="0" placeholder="" />
+        <Form.Control type="number" min="0" placeholder="" value={gasLimitDollars} onChange={e => setGasLimitDollars(Number(e.target.value))} />
       </Form.Group>
       <Form.Group className="mb-3">
-        <Form.Text className="text-muted">ETH amount (in USD) </Form.Text>
-        <Form.Control type="number" min="0" placeholder="" />
+        <Form.Text className="text-muted">wETH tokens </Form.Text>
+        <Form.Control type="number" min="0" placeholder="" value={tokenAmount} onChange={e => setTokenAmount(Number(e.target.value))} />
       </Form.Group>
       <Form.Group className="mb-3">
         <Form.Text className="text-muted">Time limit (in hours) </Form.Text>
-        <Form.Control type="number" min="0" placeholder="" />
+        <Form.Control type="number" min="0" placeholder="" value={timeLimitHours} onChange={e => setTimeLimitHours(Number(e.target.value))} />
       </Form.Group>
 
-      <Button variant="primary" type="button" onClick={() => props.onClick()}>Submit</Button>
+      <Button variant="primary" type="button" onClick={addOrder}>Submit</Button>
     </div>
   )
 }
