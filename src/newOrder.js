@@ -278,11 +278,10 @@ export function NewOrder() {
     if (!approvedResJson) {
       const { ethereum } = window;
       // var erc20Instance = new web3.eth.Contract(erc20ABI, supportedTokenTypes[tokenType]);
-      // this is USDC on ropsten
-      var erc20Instance = new web3.eth.Contract(erc20ABI, "0x0d9c8723b343a8368bebe0b5e89273ff8d712e3c");
-      // TODO: swap this out for our smart contract address
-      // right now this is a random ropsten contract
-      erc20Instance.methods.approve("0x6F42B385CaC1cd2bb189398b419D672D2bA19Dd5", 100)
+      // this is LINK on rinkeby
+      var erc20Instance = new web3.eth.Contract(erc20ABI, "0xf6b1c64e86c1213088a6464484ebb8488635795d");
+      // our smart contract on rinkeby
+      erc20Instance.methods.approve("0x7feb6F5c883071C62E00E96603214CF7f73CAb59", 100)
         .send({ from: ethereum.selectedAddress })
         .on('transactionHash', function (hash) {
           console.log(hash)
