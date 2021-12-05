@@ -1,14 +1,16 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useEffect } from 'react';
-import { Button, Container, Form } from 'react-bootstrap';
+import { Button, Container, Form, Nav } from 'react-bootstrap';
 import ReactDOM from 'react-dom';
 import Web3 from 'web3';
 import './index.css';
 import { NewOrder } from './newOrder';
+import { ExistingOrders } from './existingOrders';
 
 function GasEstimator() {
   const web3 = new Web3(Web3.givenProvider);
   const [connected, setConnected] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState('new-order');
 
   useEffect(() => {
     web3.eth.getAccounts(function (err, accounts) {
@@ -52,7 +54,16 @@ function GasEstimator() {
         <Form className="gas-form">
           {!connected && <Wallet onClick={() => connectWalletClick()} ></Wallet>}
           {connected && <div>Wallet Connected</div>}
-          <NewOrder />
+          <Nav defaultActiveKey="new-order" variant="tabs" onSelect={setActiveTab}>
+            <Nav.Item>
+              <Nav.Link eventKey="new-order">New Order</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="existing-orders">Existing Orders</Nav.Link>
+            </Nav.Item>
+          </Nav>
+          {activeTab === "new-order" && <NewOrder />}
+          {activeTab === "existing-orders" && <ExistingOrders />}
         </Form>
       </Container>
     </div>
