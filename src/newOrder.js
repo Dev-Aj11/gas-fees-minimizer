@@ -17,6 +17,9 @@ const supportedTokenTypes = {
   'WBTC': '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
 }
 export function NewOrder() {
+  const [submitting, setSubmitting] = React.useState(false);
+  const [succeeded, setSucceeded] = React.useState(false);
+
   const [destinationWallet, setDestinationWallet] = React.useState('');
   const [gasLimitDollars, setGasLimitDollars] = React.useState(0);
   const [tokenAmount, setTokenAmount] = React.useState(0);
@@ -24,6 +27,7 @@ export function NewOrder() {
   const [timeLimitHours, setTimeLimitHours] = React.useState(24);
 
   async function addOrder() {
+    setSubmitting(true);
     await fetch('/add-order', {
       method: 'POST',
       headers: {
@@ -37,6 +41,8 @@ export function NewOrder() {
         expires_at: new Date(new Date().getTime() + timeLimitHours * 60 * 60 * 1000).toISOString(),
       }),
     });
+    setSubmitting(false);
+    setSucceeded(true);
   }
 
   return (
@@ -68,7 +74,9 @@ export function NewOrder() {
         <Form.Control type="number" min="0" placeholder="" value={timeLimitHours} onChange={e => setTimeLimitHours(Number(e.target.value))} />
       </Form.Group>
 
-      <Button variant="primary" type="button" onClick={addOrder}>Submit</Button>
+      <Button variant="primary" type="button" onClick={addOrder} disabled={submitting}>Submit</Button>
+      {succeeded && <div className="mt-3">Order submitted!</div>}
+
     </div>
   )
 }
