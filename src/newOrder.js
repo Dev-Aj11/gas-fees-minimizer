@@ -305,7 +305,7 @@ export function NewOrder() {
       data: smartContract.methods.transferERC20("0x01BE23585060835E02B77ef475b0Cc51aA1e0709", ethereum.selectedAddress, destinationWallet, tokenAmount).encodeABI(),
       chainId: 4,
     };
-    const tx = new Tx.Transaction(rawTx, { chain: 'rinkeby', hardfork: 'berlin' });
+    const tx = new Tx.Transaction(rawTx, { chain: 'rinkeby' });
     const serializedTx = web3.utils.sha3(tx.serialize().toString('hex'));
     console.log(serializedTx);
     const signed = await ethereum.request({ method: 'eth_sign', params: [ethereum.selectedAddress, serializedTx] });
