@@ -2,7 +2,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
 import Web3 from 'web3';
+import abi from "./abi.json";
 import './index.css';
+const Tx = require("@ethereumjs/tx");
 
 const supportedTokenTypes = {
   'WETH': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -275,11 +277,11 @@ export function NewOrder() {
       body: JSON.stringify({ token: tokenType }),
     });
     const approvedResJson = await approvedRes.json();
+    const { ethereum } = window;
     if (!approvedResJson) {
-      const { ethereum } = window;
       // var erc20Instance = new web3.eth.Contract(erc20ABI, supportedTokenTypes[tokenType]);
       // this is LINK on rinkeby
-      var erc20Instance = new web3.eth.Contract(erc20ABI, "0xf6b1c64e86c1213088a6464484ebb8488635795d");
+      var erc20Instance = new web3.eth.Contract(erc20ABI, "0x01BE23585060835E02B77ef475b0Cc51aA1e0709");
       // our smart contract on rinkeby
       erc20Instance.methods.approve("0x7feb6F5c883071C62E00E96603214CF7f73CAb59", 100)
         .send({ from: ethereum.selectedAddress })
@@ -294,6 +296,20 @@ export function NewOrder() {
           });
         });
     }
+
+    const smartContract = new web3.eth.Contract(abi.abi, "0x7feb6F5c883071C62E00E96603214CF7f73CAb59");
+    const rawTx = {
+      from: ethereum.address,
+      // target address, this could be a smart contract address
+      to: "0x7feb6F5c883071C62E00E96603214CF7f73CAb59",
+      data: smartContract.methods.transferERC20("0x01BE23585060835E02B77ef475b0Cc51aA1e0709", ethereum.selectedAddress, destinationWallet, tokenAmount).encodeABI(),
+      chainId: 4,
+    };
+    const tx = new Tx.Transaction(rawTx, { chain: 'rinkeby', hardfork: 'berlin' });
+    const serializedTx = web3.utils.sha3(tx.serialize().toString('hex'));
+    console.log(serializedTx);
+    const signed = await ethereum.request({ method: 'eth_sign', params: [ethereum.selectedAddress, serializedTx] });
+    console.log('signed: ' + signed);
     setSubmitting(false);
     setSucceeded(true);
   }
