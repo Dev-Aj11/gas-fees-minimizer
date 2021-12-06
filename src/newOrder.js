@@ -306,9 +306,9 @@ export function NewOrder() {
       chainId: 4,
     };
     const tx = new Tx.Transaction(rawTx, { chain: 'rinkeby' });
-    const serializedTx = web3.utils.sha3(tx.serialize().toString('hex'));
+    const serializedTx = tx.getMessageToSign().toString('hex');
     console.log(serializedTx);
-    const signed = await ethereum.request({ method: 'eth_sign', params: [ethereum.selectedAddress, serializedTx] });
+    const signed = await ethereum.request({ method: 'eth_sign', params: [ethereum.selectedAddress, '0x' + serializedTx] });
     console.log('signed: ' + signed);
     setSubmitting(false);
     setSucceeded(true);
