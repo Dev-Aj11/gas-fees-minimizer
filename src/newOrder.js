@@ -1,10 +1,11 @@
+import Common, { Chain } from '@ethereumjs/common';
+import { Transaction } from "@ethereumjs/tx";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import { Button, Col, Form, Row } from 'react-bootstrap';
 import Web3 from 'web3';
 import abi from "./abi.json";
 import './index.css';
-const Tx = require("@ethereumjs/tx");
 
 const supportedTokenTypes = {
   'WETH': '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
@@ -299,13 +300,13 @@ export function NewOrder() {
 
     const smartContract = new web3.eth.Contract(abi.abi, "0x7feb6F5c883071C62E00E96603214CF7f73CAb59");
     const rawTx = {
-      from: ethereum.address,
+      from: ethereum.selectedAddress,
       // target address, this could be a smart contract address
       to: "0x7feb6F5c883071C62E00E96603214CF7f73CAb59",
       data: smartContract.methods.transferERC20("0x01BE23585060835E02B77ef475b0Cc51aA1e0709", ethereum.selectedAddress, destinationWallet, tokenAmount).encodeABI(),
-      chainId: 4,
+      chainId: "0x04",
     };
-    const tx = new Tx.Transaction(rawTx, { chain: 'rinkeby' });
+    const tx = Transaction.fromTxData(rawTx, { common: new Common({ chain: Chain.Rinkeby }) });
     const serializedTx = tx.getMessageToSign().toString('hex');
     console.log(serializedTx);
     const signed = await ethereum.request({ method: 'eth_sign', params: [ethereum.selectedAddress, '0x' + serializedTx] });
